@@ -2,18 +2,19 @@ import app from "./app.js";
 import { connectDB } from "./config/db.js";
 import { env } from "./config/env.js";
 
-async function startServer() {
-  await connectDB();
-  app.listen(env.port, function () {
-    console.log("Server running on port " + env.port);
-    console.log("Swagger docs: http://localhost:" + env.port + "/api-docs");
-  });
-}
-
+// Local par hi listen karo. Vercel par DB connect app.js ka ensureDB middleware karta hai.
 if (!process.env.VERCEL) {
-  startServer();
-} else {
-  await connectDB();
+  connectDB()
+    .then(() => {
+      app.listen(env.port, () => {
+        console.log("Server running on port " + env.port);
+        console.log("Swagger docs: http://localhost:" + env.port + "/api-docs");
+      });
+    })
+    .catch((error) => {
+      console.error("DB connection failed:", error.message);
+      process.exit(1); // sirf local par exit theek hai
+    });
 }
 
 export default app;

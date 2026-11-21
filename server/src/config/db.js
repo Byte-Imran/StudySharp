@@ -1,12 +1,23 @@
 import mongoose from "mongoose";
 import { env } from "./env.js";
 
-export async function connectDB() {
+const cached = (globalThis._mongoose ??= { conn: null, promise: null });
+
+export const connectDB = async () => {
+  if (cached.conn) return cached.conn;
+
+  cached.promise ??= mongoose.connect(env.mongoUri, {
+    serverSelectionTimeoutMS: 8000,
+  });
+
   try {
-    await mongoose.connect(env.mongoUri);
-    console.info("Connected to MongoDB.");
+    cached.conn = await cached.promise;
+    console.log("Connected to MongoDB.");
   } catch (error) {
-    console.error("MongoDB connection failed:", error);
-    throw error;
+    cached.promise = null; // agli request dobara try karegi
+    throw error; // process.exit mat karo
   }
-}
+  return cached.conn;
+};
+
+export default connectDB;
