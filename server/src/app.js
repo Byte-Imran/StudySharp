@@ -13,24 +13,59 @@ import ApiResponse from "./utils/ApiResponse.js";
 import cookieParser from "cookie-parser";
 import { env } from "./config/env.js";
 const app = express();
+if (env.nodeEnv === "production") {
+  app.set("trust proxy", 1);
+}
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || origin === env.clientUrl) {
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      let requestUrl;
+      try {
+        requestUrl = new URL(origin);
+      } catch {
+        return callback(new Error("Origin is not allowed by CORS."));
+      }
+
+      const normalizeOrigin = (url) => {
+        try {
+          return new URL(url).origin;
+        } catch {
+          return "";
+        }
+      };
+
+      const allowedOrigins = [
+        normalizeOrigin(env.clientUrl),
+        ...(process.env.CLIENT_URLS || "")
+          .split(",")
+          .map((url) => normalizeOrigin(url.trim()))
+          .filter(Boolean),
+      ];
+
+      if (allowedOrigins.includes(requestUrl.origin)) {
+        return callback(null, true);
+      }
+
+      if (
+        env.nodeEnv === "production" &&
+        process.env.VERCEL &&
+        requestUrl.protocol === "https:" &&
+        requestUrl.hostname.endsWith(".vercel.app")
+      ) {
         return callback(null, true);
       }
 
       if (env.nodeEnv !== "production") {
-        try {
-          const { hostname, protocol } = new URL(origin);
-          if (
-            protocol === "http:" &&
-            ["localhost", "127.0.0.1"].includes(hostname)
-          ) {
-            return callback(null, true);
-          }
-        } catch {
-          return callback(new Error("Invalid request origin."));
+        const { hostname, protocol } = requestUrl;
+        if (
+          protocol === "http:" &&
+          ["localhost", "127.0.0.1"].includes(hostname)
+        ) {
+          return callback(null, true);
         }
       }
 

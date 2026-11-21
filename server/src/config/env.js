@@ -6,8 +6,12 @@ dotenv.config({ path: fileURLToPath(new URL("../.env", import.meta.url)) });
 
 const port = Number(process.env.PORT ?? 5000);
 const mongoUri = process.env.MONGO_URI?.trim();
-const nodeEnv = process.env.NODE_ENV ?? "development";
-const clientUrl = process.env.CLIENT_URL ?? "http://localhost:5173";
+const nodeEnv =
+  process.env.VERCEL || process.env.RENDER || process.env.RAILWAY_ENVIRONMENT
+    ? "production"
+    : (process.env.NODE_ENV ?? "development");
+const clientUrl = (process.env.CLIENT_URL ?? "http://localhost:5173").replace(/\/+$/, "");
+const serverUrl = (process.env.SERVER_URL || "").replace(/\/+$/, "");
 
 if (!Number.isInteger(port) || port < 1 || port > 65535) {
   throw new Error("PORT must be an integer between 1 and 65535.");
@@ -35,4 +39,5 @@ export const env = Object.freeze({
   mongoUri,
   nodeEnv,
   clientUrl,
+  serverUrl,
 });

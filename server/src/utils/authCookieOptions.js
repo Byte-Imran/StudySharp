@@ -1,6 +1,10 @@
 import { env } from "../config/env.js";
 
-const isProduction = env.nodeEnv === "production";
+const isProduction =
+  env.nodeEnv === "production" ||
+  Boolean(process.env.VERCEL) ||
+  Boolean(process.env.RENDER) ||
+  Boolean(process.env.RAILWAY_ENVIRONMENT);
 
 const authCookieOptions = {
   httpOnly: true,

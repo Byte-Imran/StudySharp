@@ -90,7 +90,8 @@ const Login = () => {
 
   const handleOAuth = (provider) => {
     const baseURL = axiosInstance.defaults.baseURL || "";
-    window.location.href = `${baseURL}/api/v1/auth/${provider}`;
+    const normalizedBaseURL = String(baseURL).replace(/\/+$/, "");
+    window.location.href = `${normalizedBaseURL}/api/v1/auth/${provider}`;
   };
 
   return (
