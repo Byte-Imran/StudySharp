@@ -12,7 +12,11 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        <RouterProvider router={router} fallbackElement={<PageLoader />} />
+        <RouterProvider
+          router={router}
+          fallbackElement={<PageLoader />}
+          hydrateFallbackElement={<PageLoader />}
+        />
       </PersistGate>
     </Provider>
   </React.StrictMode>,

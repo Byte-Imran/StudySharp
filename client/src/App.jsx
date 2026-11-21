@@ -15,6 +15,7 @@ const App = () => {
   const oauthHandled = useRef(false);
   const { pathname } = location;
   const isAuthPage = ["/login", "/register"].includes(pathname);
+  const isStandalonePage = ["/profile"].includes(pathname);
   const themeMode = useSelector((state) => state.theme.mode);
 
   useEffect(() => {
@@ -81,16 +82,16 @@ const App = () => {
 
   return (
     <div className="flex min-h-screen flex-col bg-[#fcf9f8] text-[#1b1c1c] dark:bg-[#1b1c1c] dark:text-[#fcf9f8]">
-      {!isAuthPage && <Navbar />}
+      {!isAuthPage && !isStandalonePage && <Navbar />}
       <main
         className={`flex flex-1 flex-col ${
-          isAuthPage ? "" : "pb-20 lg:pb-0"
+          isAuthPage || isStandalonePage ? "" : "pb-20 lg:pb-0"
         }`}
       >
         <Outlet />
       </main>
-      {!isAuthPage && <Footer />}
-      {!isAuthPage && <BottomNavigation />}
+      {!isAuthPage && !isStandalonePage && <Footer />}
+      {!isAuthPage && !isStandalonePage && <BottomNavigation />}
       <Toaster position="top-right" />
     </div>
   );

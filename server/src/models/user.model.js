@@ -29,7 +29,18 @@ const userSchema = new mongoose.Schema(
     education: { type: String, default: "" },
     location: { type: String, default: "" },
     nickname: { type: String, default: "" },
+    quote: { type: String, default: "", maxlength: 180, trim: true },
+    skills: {
+      type: [{ type: String, trim: true, maxlength: 40 }],
+      default: [],
+      validate: {
+        validator: (skills) =>
+          skills.length <= 20 && skills.every((skill) => skill.length <= 40),
+        message: "A maximum of 20 skills can be added, with 40 characters per skill.",
+      },
+    },
     img: { type: String, default: "" },
+    avatarPublicId: { type: String, default: null },
 
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],

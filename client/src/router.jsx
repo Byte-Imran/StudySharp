@@ -31,6 +31,12 @@ const router = createBrowserRouter([
         }),
         children: [
           {
+            path: "profile",
+            lazy: async () => ({
+              Component: (await import("./features/profile/pages/ProfilePage.jsx")).default,
+            }),
+          },
+          {
             path: "*",
             lazy: async () => ({
               Component: (await import("./pages/NotFound.jsx")).default,
