@@ -1,7 +1,6 @@
 import app from "./app.js";
 import { connectDB } from "./config/db.js";
 import { env } from "./config/env.js";
-// Local par hi listen karo. Vercel par DB connect app.js ka ensureDB middleware karta hai.
 if (!process.env.VERCEL) {
   connectDB()
     .then(() => {
@@ -12,7 +11,7 @@ if (!process.env.VERCEL) {
     })
     .catch((error) => {
       console.error("DB connection failed:", error.message);
-      process.exit(1); // sirf local par exit theek hai
+      process.exit(1); 
     });
 }
 export default app;
