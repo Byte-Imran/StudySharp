@@ -11,6 +11,7 @@ import {
   notFoundHandler,
 } from "./middlewares/error.middleware.js";
 import apiRoutes from "./routes/index.js";
+import authRoutes from "./routes/auth.routes.js";
 import ApiResponse from "./utils/ApiResponse.js";
 import { env } from "./config/env.js";
 
@@ -96,6 +97,7 @@ const ensureDB = async (_req, _res, next) => {
 };
 
 app.use("/api/v1", ensureDB, apiRoutes);
+app.use("/auth", ensureDB, authRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

@@ -2,7 +2,12 @@ import { Router } from "express";
 import crypto from "crypto";
 import { env } from "../config/env.js";
 import passport from "../config/passport.js";
-import { googleCallback } from "../controllers/auth.controller.js";
+import {
+  googleCallback,
+  githubCallback,
+} from "../controllers/auth.controller.js";
+import { verifyJWT } from "../middlewares/verifyJWT.js";
+import { getCurrentUser } from "../controllers/user.controller.js";
 
 const router = Router();
 const isProd =
@@ -27,6 +32,11 @@ const getPublicServerUrl = (req) => {
   const host = forwardedHost || req.get("host");
 
   return host ? `${protocol}://${host}` : "";
+};
+
+const getOAuthBasePath = (req) => {
+  if (req.baseUrl) return req.baseUrl;
+  return "/api/v1/auth";
 };
 
 // Step 1: Google par bhejo
@@ -73,6 +83,53 @@ router.get(
     })(req, res, next);
   },
   googleCallback,
+);
+
+router.get("/me", verifyJWT, getCurrentUser);
+
+router.get("/github", (req, res, next) => {
+  const state = crypto.randomBytes(16).toString("hex");
+  res.cookie("oauth_state", state, stateCookie);
+
+  const publicServerUrl = getPublicServerUrl(req);
+  const oauthBasePath = getOAuthBasePath(req);
+  const callbackURL =
+    (env.serverUrl && `${env.serverUrl}${oauthBasePath}/github/callback`) ||
+    (publicServerUrl && `${publicServerUrl}${oauthBasePath}/github/callback`) ||
+    process.env.GITHUB_CALLBACK_URL;
+
+  passport.authenticate("github", {
+    scope: ["user:email"],
+    session: false,
+    state,
+    callbackURL,
+  })(req, res, next);
+});
+
+router.get(
+  "/github/callback",
+  (req, res, next) => {
+    const failUrl = new URL("/login", env.clientUrl);
+    failUrl.searchParams.set("error", "oauth_failed");
+
+    if (!req.query.state || req.query.state !== req.cookies.oauth_state) {
+      res.clearCookie("oauth_state", stateCookie);
+      return res.redirect(failUrl.toString());
+    }
+    res.clearCookie("oauth_state", stateCookie);
+
+    passport.authenticate("github", {
+      session: false,
+      failureRedirect: failUrl.toString(),
+      callbackURL:
+        (env.serverUrl &&
+          `${env.serverUrl}${getOAuthBasePath(req)}/github/callback`) ||
+        (getPublicServerUrl(req) &&
+          `${getPublicServerUrl(req)}${getOAuthBasePath(req)}/github/callback`) ||
+        process.env.GITHUB_CALLBACK_URL,
+    })(req, res, next);
+  },
+  githubCallback,
 );
 
 export default router;

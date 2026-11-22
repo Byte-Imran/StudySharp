@@ -23,7 +23,7 @@ const App = () => {
 
     if (oauthError === "oauth_failed" && !oauthHandled.current) {
       oauthHandled.current = true;
-      toast.error("Google sign-in failed. Please try again.");
+      toast.error("OAuth sign-in failed. Please try again.");
       searchParams.delete("error");
       navigate(
         {
@@ -45,7 +45,7 @@ const App = () => {
 
     oauthHandled.current = true;
     axiosInstance
-      .get("/api/v1/users/me")
+      .get("/api/v1/auth/me")
       .then((response) => {
         const user = response.data?.data?.user;
         if (!user) {
@@ -53,7 +53,7 @@ const App = () => {
         }
 
         dispatch(setUser(user));
-        toast.success("Signed in with Google.");
+        toast.success("Signed in successfully.");
       })
       .catch((error) => {
         toast.error(

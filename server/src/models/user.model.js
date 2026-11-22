@@ -22,8 +22,8 @@ const userSchema = new mongoose.Schema(
         return !this.googleId && !this.githubId;
       },
     },
-    googleId: { type: String, default: null },
-    githubId: { type: String, default: null },
+    googleId: { type: String, unique: true, sparse: true },
+    githubId: { type: String, unique: true, sparse: true },
     gender: { type: String, enum: ["male", "female"] },
     bio: { type: String, default: "" },
     education: { type: String, default: "" },

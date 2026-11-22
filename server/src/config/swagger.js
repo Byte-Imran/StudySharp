@@ -404,6 +404,55 @@ const swaggerSpecification = {
         },
       },
     },
+
+    "/api/v1/auth/github": {
+      get: {
+        tags: ["Authentication"],
+        summary: "Start GitHub OAuth",
+        description:
+          "Redirects to GitHub OAuth and requests access to the user's verified email.",
+        responses: {
+          302: { description: "Redirect to GitHub OAuth consent." },
+          500: { $ref: "#/components/responses/Error" },
+        },
+      },
+    },
+    "/api/v1/auth/github/callback": {
+      get: {
+        tags: ["Authentication"],
+        summary: "GitHub OAuth callback",
+        parameters: [
+          {
+            name: "code",
+            in: "query",
+            required: false,
+            schema: { type: "string" },
+          },
+          {
+            name: "state",
+            in: "query",
+            required: true,
+            schema: { type: "string" },
+          },
+        ],
+        responses: {
+          302: { description: "Redirect to the frontend after GitHub authentication." },
+          401: { $ref: "#/components/responses/Error" },
+          500: { $ref: "#/components/responses/Error" },
+        },
+      },
+    },
+    "/api/v1/auth/me": {
+      get: {
+        tags: ["Authentication", "Users"],
+        summary: "Get the current OAuth or local user",
+        security: [{ cookieAuth: [] }],
+        responses: {
+          200: { description: "Current authenticated user." },
+          401: { $ref: "#/components/responses/Error" },
+        },
+      },
+    },
   },
 };
 
